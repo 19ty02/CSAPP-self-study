@@ -1,0 +1,46 @@
+    .pos 0
+    irmovq stack, %rsp     # Set up stack pointer
+    call main              # Execute main program
+    halt                   # Terminate program
+
+    .align 8
+# Source block
+src:
+    .quad 0x00a 
+    .quad 0x0b0
+    .quad 0xc00
+# Destination block
+dest:
+    .quad 0x111
+    .quad 0x222
+    .quad 0x333
+
+copy_block:
+    irmovq $0, %rax
+    irmovq $8, %r8       # constant 8
+    irmovq $1, %r9       # constant 1
+    subq %rax, %rdx      # %rdx -= 0
+    jmp test
+loop:
+    mrmovq (%rdi), %rcx  # %rcx is val
+    addq %r8, %rdi       # src++
+    rmmovq %rcx, (%rsi)  # *dest = val
+    addq %r8, %rsi       # dest++
+    xorq %rcx, %rax      # result ^= val
+    subq %r9, %rdx       # len-- 
+
+test:
+    jg loop              # jump if > 0
+    ret
+
+
+
+main:
+    irmovq src, %rdi
+    irmovq dest, %rsi
+    irmovq $3, %rdx
+    call copy_block        # The answer is in %rax
+    ret
+
+    .pos 0x400
+stack:

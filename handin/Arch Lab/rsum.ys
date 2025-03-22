@@ -1,0 +1,38 @@
+    .pos 0
+    irmovq stack, %rsp     # Set up stack pointer
+    call main              # Execute main program
+    halt                   # Terminate program
+
+    .align 8
+ele1:
+    .quad 0x00a
+    .quad ele2
+ele2:
+    .quad 0x0b0
+    .quad ele3
+ele3:
+    .quad 0xc00
+    .quad 0
+
+rsum_list:
+    andq %rdi, %rdi
+    jne recursion          # If !=0, goto recursion
+    irmovq $0, %rax        #
+    ret                    # return 0
+
+recursion:
+    mrmovq (%rdi), %rsi    # Get val first, becuase function call may have side-effect
+    pushq %rsi             # Store it to stack
+    mrmovq 8(%rdi), %rdi   # ls = ls->val
+    call rsum_list
+    popq %rsi              # %rsi is val
+    addq %rsi, %rax        # return val + (recursion result)
+    ret
+
+main:
+    irmovq ele1, %rdi
+    call rsum_list         # The answer is in %rax
+    ret
+
+    .pos 0x400
+stack:
